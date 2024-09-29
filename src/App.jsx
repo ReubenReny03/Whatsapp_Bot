@@ -51,7 +51,7 @@ const App = () => {
 
     // Send the payload to the backend API
     try {
-      const response = await fetch('https://api.reubenreny.live/create-group', {
+      const response = await fetch('https://realreubenreny.tech/create-group', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
