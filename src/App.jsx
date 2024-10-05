@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 const App = () => {
   // State variables to hold form inputs
   const [groupName, setGroupName] = useState('');
-  const [primaryPhoneNumber, setPrimaryPhoneNumber] = useState(''); // Primary phone number field
+  const [yourPhoneNumber, setYourPhoneNumber] = useState(''); // New field for your phone number
   const [otherPhoneNumbers, setOtherPhoneNumbers] = useState(''); // For multiple phone numbers entered as text
   const [secretCode, setSecretCode] = useState(''); // Secret code field
   const [error, setError] = useState(''); // Error message state
@@ -14,7 +14,7 @@ const App = () => {
     const numberArray = numbers.split('\n').map((num) => num.trim());
     for (const number of numberArray) {
       // Validate the format: only digits and length between 10 to 15 characters
-      if (!/^\d{10,15}$/.test(number)) {
+      if (!/^\d{12}$/.test(number)) {
         return false;
       }
     }
@@ -26,37 +26,40 @@ const App = () => {
     event.preventDefault(); // Prevent form from refreshing the page
 
     // Check if all required fields are filled
-    if (!groupName || !primaryPhoneNumber || !otherPhoneNumbers || !secretCode) {
-      setError('Please fill in all fields including Secret Code and enter phone numbers in the correct format.');
+    if (!groupName || !yourPhoneNumber || !otherPhoneNumbers || !secretCode) {
+      setError('Please fill in all fields including Your Phone Number, Secret Code, and enter phone numbers in the correct format.');
       return;
     }
 
-    // Validate the primary phone number format
-    if (!/^\d{10,15}$/.test(primaryPhoneNumber)) {
-      setError('Primary phone number is in an incorrect format. Please ensure it follows <country code><number> without "+" at the start.');
+    // Validate the format of "Your Phone Number"
+    if (!validatePhoneNumbers(yourPhoneNumber)) {
+      setError('Your Phone Number is in an incorrect format. Please ensure it follows <country code><number> without "+" at the start.');
       return;
     }
 
-    // Validate the format of the other phone numbers entered in the text area
+    // Validate the format of the phone numbers entered in the text area
     if (!validatePhoneNumbers(otherPhoneNumbers)) {
       setError('One or more phone numbers are in an incorrect format. Please ensure they follow <country code><number> without "+" at the start.');
       return;
     }
 
-    // Format phone numbers by adding @c.us suffix and include primary number
+    // Format "Your Phone Number" and add @c.us suffix
+    const formattedYourPhoneNumber = `${yourPhoneNumber.trim()}@c.us`;
+
+    // Format phone numbers by adding @c.us suffix
     const formattedPhoneNumbers = [
-      `${primaryPhoneNumber.trim()}@c.us`, // Include primary phone number
+      formattedYourPhoneNumber, // Add your phone number to the top of the list
       ...otherPhoneNumbers
         .split('\n') // Split by new line
         .map((number) => `${number.trim()}@c.us`)
-        .filter((number) => number.trim() !== '') // Remove any empty lines
+        .filter((number) => number.trim() !== ''), // Remove any empty lines
     ];
 
     // Create a request payload
     const payload = {
       groupName: groupName,
       phoneNumbers: formattedPhoneNumbers,
-      SecretCode: secretCode
+      SecretCode: secretCode,
     };
 
     // Set loading to true
@@ -79,7 +82,7 @@ const App = () => {
         alert(`Group created successfully with ID: ${result.groupId}`);
         setError(''); // Clear error message on successful submission
         setGroupName('');
-        setPrimaryPhoneNumber('');
+        setYourPhoneNumber('');
         setOtherPhoneNumbers('');
         setSecretCode('');
       } else {
@@ -133,12 +136,12 @@ const App = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Primary Phone Number</label>
+              <label className="block text-sm font-medium text-gray-700">Your Phone Number</label>
               <input
                 type="text"
-                placeholder="Enter primary phone number"
-                value={primaryPhoneNumber}
-                onChange={(e) => setPrimaryPhoneNumber(e.target.value)}
+                placeholder="Enter your phone number, e.g., 912134567890"
+                value={yourPhoneNumber}
+                onChange={(e) => setYourPhoneNumber(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
