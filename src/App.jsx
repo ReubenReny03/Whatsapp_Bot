@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React, { useState } from 'react';
 
 const App = () => {
@@ -7,6 +6,7 @@ const App = () => {
   const [otherPhoneNumbers, setOtherPhoneNumbers] = useState(''); // For multiple phone numbers entered as text
   const [secretCode, setSecretCode] = useState(''); // Secret code field
   const [error, setError] = useState(''); // Error message state
+  const [loading, setLoading] = useState(false); // Loading state
 
   // Function to validate phone numbers format (without @c.us)
   const validatePhoneNumbers = (numbers) => {
@@ -30,6 +30,12 @@ const App = () => {
       return;
     }
 
+    // Alert the user to confirm if they added their own number
+    const confirmOwnNumber = window.confirm('Have you added your own number? Please check the phone numbers before proceeding.');
+    if (!confirmOwnNumber) {
+      return; // Exit if the user didn't confirm
+    }
+
     // Validate the format of the phone numbers entered in the text area
     if (!validatePhoneNumbers(otherPhoneNumbers)) {
       setError('One or more phone numbers are in an incorrect format. Please ensure they follow <country code><number> without "+" at the start.');
@@ -49,6 +55,9 @@ const App = () => {
       SecretCode: secretCode
     };
 
+    // Set loading to true
+    setLoading(true);
+
     // Send the payload to the backend API
     try {
       const response = await fetch('https://realreubenreny.tech/create-group', {
@@ -60,6 +69,8 @@ const App = () => {
       });
 
       const result = await response.json();
+      setLoading(false); // Stop loading on response
+
       if (response.ok) {
         alert(`Group created successfully with ID: ${result.groupId}`);
         setError(''); // Clear error message on successful submission
@@ -71,6 +82,7 @@ const App = () => {
         setError(result.error);
       }
     } catch (error) {
+      setLoading(false); // Stop loading on error
       console.error('Error creating group:', error);
       setError('Failed to create group. Please check the server logs.');
     }
@@ -98,48 +110,54 @@ const App = () => {
           </div>
         )}
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Group Name</label>
-            <input
-              type="text"
-              placeholder="Enter group name"
-              value={groupName}
-              onChange={(e) => setGroupName(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
+        {loading ? (
+          <div className="mb-4 p-4 text-blue-700 bg-blue-100 border border-blue-400 rounded text-center">
+            Loading... Please wait.
           </div>
+        ) : (
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Group Name</label>
+              <input
+                type="text"
+                placeholder="Enter group name"
+                value={groupName}
+                onChange={(e) => setGroupName(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Secret Code</label>
-            <input
-              type="text"
-              placeholder="Enter Secret Code"
-              value={secretCode}
-              onChange={(e) => setSecretCode(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Secret Code</label>
+              <input
+                type="text"
+                placeholder="Enter Secret Code"
+                value={secretCode}
+                onChange={(e) => setSecretCode(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Phone Numbers (One Per Line)</label>
-            <textarea
-              placeholder="Enter phone numbers, one per line, e.g., 912134567890"
-              value={otherPhoneNumbers}
-              onChange={(e) => setOtherPhoneNumbers(e.target.value)}
-              rows="6" // Set more rows for better visibility
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Phone Numbers (One Per Line)</label>
+              <textarea
+                placeholder="Enter phone numbers, one per line, e.g., 912134567890"
+                value={otherPhoneNumbers}
+                onChange={(e) => setOtherPhoneNumbers(e.target.value)}
+                rows="6" // Set more rows for better visibility
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              className="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-              Submit
-            </button>
-          </div>
-        </form>
+            <div>
+              <button
+                type="submit"
+                className="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Submit
+              </button>
+            </div>
+          </form>
+        )}
 
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
