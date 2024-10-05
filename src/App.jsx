@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const App = () => {
   // State variables to hold form inputs
   const [groupName, setGroupName] = useState('');
+  const [primaryPhoneNumber, setPrimaryPhoneNumber] = useState(''); // Primary phone number field
   const [otherPhoneNumbers, setOtherPhoneNumbers] = useState(''); // For multiple phone numbers entered as text
   const [secretCode, setSecretCode] = useState(''); // Secret code field
   const [error, setError] = useState(''); // Error message state
@@ -25,30 +26,31 @@ const App = () => {
     event.preventDefault(); // Prevent form from refreshing the page
 
     // Check if all required fields are filled
-    if (!groupName || !otherPhoneNumbers || !secretCode) {
+    if (!groupName || !primaryPhoneNumber || !otherPhoneNumbers || !secretCode) {
       setError('Please fill in all fields including Secret Code and enter phone numbers in the correct format.');
       return;
     }
 
-    
-    // Validate the format of the phone numbers entered in the text area
+    // Validate the primary phone number format
+    if (!/^\d{10,15}$/.test(primaryPhoneNumber)) {
+      setError('Primary phone number is in an incorrect format. Please ensure it follows <country code><number> without "+" at the start.');
+      return;
+    }
+
+    // Validate the format of the other phone numbers entered in the text area
     if (!validatePhoneNumbers(otherPhoneNumbers)) {
       setError('One or more phone numbers are in an incorrect format. Please ensure they follow <country code><number> without "+" at the start.');
       return;
     }
 
-    // Alert the user to confirm if they added their own number
-    const confirmOwnNumber = window.confirm('REMINDER : Press cancel if you forgot to add your own number if not then press OK');
-    if (!confirmOwnNumber) {
-      return; // Exit if the user didn't confirm
-    }
-
-
-    // Format phone numbers by adding @c.us suffix
-    const formattedPhoneNumbers = otherPhoneNumbers
-      .split('\n') // Split by new line
-      .map((number) => `${number.trim()}@c.us`)
-      .filter((number) => number.trim() !== ''); // Remove any empty lines
+    // Format phone numbers by adding @c.us suffix and include primary number
+    const formattedPhoneNumbers = [
+      `${primaryPhoneNumber.trim()}@c.us`, // Include primary phone number
+      ...otherPhoneNumbers
+        .split('\n') // Split by new line
+        .map((number) => `${number.trim()}@c.us`)
+        .filter((number) => number.trim() !== '') // Remove any empty lines
+    ];
 
     // Create a request payload
     const payload = {
@@ -77,6 +79,7 @@ const App = () => {
         alert(`Group created successfully with ID: ${result.groupId}`);
         setError(''); // Clear error message on successful submission
         setGroupName('');
+        setPrimaryPhoneNumber('');
         setOtherPhoneNumbers('');
         setSecretCode('');
       } else {
@@ -125,6 +128,17 @@ const App = () => {
                 placeholder="Enter group name"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
+                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Primary Phone Number</label>
+              <input
+                type="text"
+                placeholder="Enter primary phone number"
+                value={primaryPhoneNumber}
+                onChange={(e) => setPrimaryPhoneNumber(e.target.value)}
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
             </div>
