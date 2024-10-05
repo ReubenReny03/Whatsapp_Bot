@@ -30,17 +30,19 @@ const App = () => {
       return;
     }
 
-    // Alert the user to confirm if they added their own number
-    const confirmOwnNumber = window.confirm('Have you added your own number? Please check the phone numbers before proceeding.');
-    if (!confirmOwnNumber) {
-      return; // Exit if the user didn't confirm
-    }
-
+    
     // Validate the format of the phone numbers entered in the text area
     if (!validatePhoneNumbers(otherPhoneNumbers)) {
       setError('One or more phone numbers are in an incorrect format. Please ensure they follow <country code><number> without "+" at the start.');
       return;
     }
+
+    // Alert the user to confirm if they added their own number
+    const confirmOwnNumber = window.confirm('REMINDER : Press cancel if you forgot to add your own number if not then press OK');
+    if (!confirmOwnNumber) {
+      return; // Exit if the user didn't confirm
+    }
+
 
     // Format phone numbers by adding @c.us suffix
     const formattedPhoneNumbers = otherPhoneNumbers
